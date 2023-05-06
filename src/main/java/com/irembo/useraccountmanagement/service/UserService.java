@@ -1,21 +1,16 @@
 package com.irembo.useraccountmanagement.service;
 
-import com.irembo.useraccountmanagement.dto.UserRegistrationDto;
-import com.irembo.useraccountmanagement.entity.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
-
-import java.util.List;
+import com.bezkoder.springjwt.models.User;
 
 /**
- * Created by USER on 5/2/2023.
+ * Created by USER on 5/5/2023.
  */
-public interface UserService extends UserDetailsService {
-
-    User register(UserRegistrationDto registrationDto);
-
-    User findByUsername(String username);
-
+public interface UserService {
+    User registerUser(User user);
     User findByEmail(String email);
+    void changePassword(String email, String newPassword);
 
-    List<User> findAll();
+    User findById(Long userId);
+
+    User updateUser(User user);
 }
