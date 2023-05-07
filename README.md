@@ -2,18 +2,12 @@ MFA AUTHENTICATION_fLOW
 ![alt-text](data/Login_flow.png "AUTHENTICATION_fLOW")
 1. The features should include:
     a. Ability to create an account - signup
-    
+    ![alt-text](data/login.png "AUTHENTICATION_fLOW")
+
     b. Login and Logout
+        ![alt-text](data/login_.png "AUTHENTICATION_fLOW")
     c. Reset password
-## User Registration, User Login and Authorization process.
-The diagram shows flow of how we implement User Registration, User Login and Authorization process.
-
-![spring-boot-jwt-authentication-spring-security-flow](spring-boot-jwt-authentication-spring-security-flow.png)
-
-## Spring Boot Server Architecture with Spring Security
-You can have an overview of our Spring Boot Server with the diagram below:
-
-![spring-boot-jwt-authentication-spring-security-architecture](spring-boot-jwt-authentication-spring-security-architecture.png)
+##
 
 ## Dependency
 – If you want to use PostgreSQL:
