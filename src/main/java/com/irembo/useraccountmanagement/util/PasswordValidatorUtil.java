@@ -15,12 +15,12 @@ public class PasswordValidatorUtil {
         // Create a password validator with a list of rules
         org.passay.PasswordValidator validator = new org.passay.PasswordValidator(Arrays.asList(
                 new LengthRule(8, 30),
-//                new UppercaseCharacterRule(1),
-//                new DigitCharacterRule(1),
-//                new SpecialCharacterRule(1),
-//                new NumericalSequenceRule(3, false),
-//                new AlphabeticalSequenceRule(3, false),
-//                new QwertySequenceRule(3, false),
+                new UppercaseCharacterRule(1),
+                new DigitCharacterRule(1),
+                new SpecialCharacterRule(1),
+                new NumericalSequenceRule(3, false),
+                new AlphabeticalSequenceRule(3, false),
+                new QwertySequenceRule(3, false),
                 new WhitespaceRule()));
 
         // Validate the password using the validator
