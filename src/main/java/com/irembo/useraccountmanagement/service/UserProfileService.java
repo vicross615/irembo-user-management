@@ -1,6 +1,7 @@
 package com.irembo.useraccountmanagement.service;
 
-import com.bezkoder.springjwt.models.UserProfile;
+
+import com.irembo.useraccountmanagement.models.UserProfile;
 
 /**
  * Created by USER on 5/5/2023.

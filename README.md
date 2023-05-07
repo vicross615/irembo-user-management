@@ -1,5 +1,10 @@
-# Spring Boot 2fa Authentication 
-
+MFA AUTHENTICATION_fLOW
+![alt-text](data/Login_flow.png "AUTHENTICATION_fLOW")
+1. The features should include:
+    a. Ability to create an account - signup
+    
+    b. Login and Logout
+    c. Reset password
 ## User Registration, User Login and Authorization process.
 The diagram shows flow of how we implement User Registration, User Login and Authorization process.
 

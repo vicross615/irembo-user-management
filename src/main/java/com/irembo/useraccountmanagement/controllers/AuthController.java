@@ -9,11 +9,24 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import com.bezkoder.springjwt.service.MfaService;
-import com.bezkoder.springjwt.service.PasswordlessService;
-import com.bezkoder.springjwt.service.UserService;
-import com.bezkoder.springjwt.util.PasswordValidatorUtil;
+import com.irembo.useraccountmanagement.models.ERole;
+import com.irembo.useraccountmanagement.models.Role;
+import com.irembo.useraccountmanagement.models.User;
+import com.irembo.useraccountmanagement.payload.request.LoginRequest;
+import com.irembo.useraccountmanagement.payload.request.SignupRequest;
+import com.irembo.useraccountmanagement.payload.response.JwtResponse;
+import com.irembo.useraccountmanagement.payload.response.MessageResponse;
+import com.irembo.useraccountmanagement.repository.RoleRepository;
+import com.irembo.useraccountmanagement.repository.UserRepository;
+import com.irembo.useraccountmanagement.security.jwt.JwtUtils;
+import com.irembo.useraccountmanagement.security.services.UserDetailsImpl;
+import com.irembo.useraccountmanagement.service.MfaService;
+import com.irembo.useraccountmanagement.service.PasswordlessService;
+import com.irembo.useraccountmanagement.service.SessionService;
+import com.irembo.useraccountmanagement.service.UserService;
+import com.irembo.useraccountmanagement.util.PasswordValidatorUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,18 +36,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
-
-import com.bezkoder.springjwt.models.ERole;
-import com.bezkoder.springjwt.models.Role;
-import com.bezkoder.springjwt.models.User;
-import com.bezkoder.springjwt.payload.request.LoginRequest;
-import com.bezkoder.springjwt.payload.request.SignupRequest;
-import com.bezkoder.springjwt.payload.response.JwtResponse;
-import com.bezkoder.springjwt.payload.response.MessageResponse;
-import com.bezkoder.springjwt.repository.RoleRepository;
-import com.bezkoder.springjwt.repository.UserRepository;
-import com.bezkoder.springjwt.security.jwt.JwtUtils;
-import com.bezkoder.springjwt.security.services.UserDetailsImpl;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -58,6 +59,9 @@ public class AuthController {
 	@Autowired
 	UserService userService;
 
+	@Autowired
+	private SessionService sessionService;
+
 
 	@Autowired
 	private MfaService mfaService;
@@ -70,20 +74,29 @@ public class AuthController {
 
 		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+		if (authentication != null) {
+			SecurityContextHolder.getContext().setAuthentication(authentication);
+			String jwt = jwtUtils.generateJwtToken(authentication);
 
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-		String jwt = jwtUtils.generateJwtToken(authentication);
-		
-		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();		
-		List<String> roles = userDetails.getAuthorities().stream()
-				.map(item -> item.getAuthority())
-				.collect(Collectors.toList());
+			HttpHeaders headers = new HttpHeaders();
+			String sessionId = sessionService.createSession(loginRequest.getUsername(), jwt);
+			headers.add("Set-Cookie", "sessionId=" + sessionId + "; HttpOnly; SameSite=Lax");
 
-		return ResponseEntity.ok(new JwtResponse(jwt, 
-												 userDetails.getId(), 
-												 userDetails.getUsername(), 
-												 userDetails.getEmail(), 
-												 roles));
+			UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+			List<String> roles = userDetails.getAuthorities().stream()
+					.map(item -> item.getAuthority())
+					.collect(Collectors.toList());
+
+			if (userDetails != null && userDetails.isMfaEnabled()) {
+				mfaService.generateAndSendMfaCode(userDetails.getEmail());
+				return new ResponseEntity<>("MFA code sent, please verify", HttpStatus.OK);
+			} else {
+				headers.add("Authorization", "Bearer " + jwt);
+				return new ResponseEntity<>("Logged in", headers, HttpStatus.OK);
+			}
+		} else {
+			return new ResponseEntity<>("Invalid credentials", HttpStatus.UNAUTHORIZED);
+		}
 	}
 
 	@PostMapping("/signup")
@@ -107,7 +120,7 @@ public class AuthController {
 		// Create new user's account
 		User user = new User(signUpRequest.getUsername(), 
 							 signUpRequest.getEmail(),
-							 encoder.encode(signUpRequest.getPassword()));
+							 encoder.encode(signUpRequest.getPassword()), signUpRequest.isMfaEnabled());
 
 		Set<String> strRoles = signUpRequest.getRole();
 		Set<Role> roles = new HashSet<>();
@@ -167,24 +180,27 @@ public class AuthController {
 	}
 
 	// Add a new API endpoint for sending the MFA code after a successful login
-	@PostMapping("/send-mfa-code")
-	public ResponseEntity<String> sendMfaCode(@RequestBody User user) {
-		User existingUser = userService.findByEmail(user.getUsername());
-		if (existingUser != null) {
-			mfaService.generateAndSendMfaCode(existingUser);
-			return new ResponseEntity<>("MFA code sent", HttpStatus.OK);
-		} else {
-			return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
-		}
-	}
+//	@PostMapping("/send-mfa-code")
+//	public ResponseEntity<String> sendMfaCode(@RequestBody String email) {
+//		User existingUser = userService.findByEmail(email);
+//		if (existingUser != null) {
+//			mfaService.generateAndSendMfaCode(existingUser.getEmail());
+//			return new ResponseEntity<>("MFA code sent", HttpStatus.OK);
+//		} else {
+//			return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+//		}
+//	}
 
 	// Add a new API endpoint for verifying the MFA code
 	@PostMapping("/verify-mfa-code")
-	public ResponseEntity<String> verifyMfaCode(@RequestBody User user, @RequestParam("code") String code) {
-		User existingUser = userService.findByEmail(user.getUsername());
+	public ResponseEntity<String> verifyMfaCode(@RequestParam("email")  String email, @RequestParam("code") String code, @CookieValue("sessionId") String sessionId) {
+		User existingUser = userService.findByEmail(email);
 		if (existingUser != null) {
-			if (mfaService.verifyMfaCode(existingUser, code)) {
-				return new ResponseEntity<>("MFA code verified", HttpStatus.OK);
+			if (mfaService.verifyMfaCode(existingUser.getEmail(), code)) {
+				String accessToken = sessionService.getAccessToken(sessionId);
+				HttpHeaders headers = new HttpHeaders();
+				headers.add("Authorization", "Bearer " + accessToken);
+				return new ResponseEntity<>("MFA code verified", headers, HttpStatus.OK);
 			} else {
 				return new ResponseEntity<>("Invalid MFA code", HttpStatus.BAD_REQUEST);
 			}

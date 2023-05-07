@@ -1,6 +1,6 @@
 package com.irembo.useraccountmanagement.repository;
 
-import com.bezkoder.springjwt.models.DocumentVerification;
+import com.irembo.useraccountmanagement.models.DocumentVerification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,8 +1,8 @@
 package com.irembo.useraccountmanagement.service;
 
-import com.bezkoder.springjwt.models.User;
-import com.bezkoder.springjwt.repository.UserRepository;
-import com.bezkoder.springjwt.security.jwt.JwtUtils;
+import com.irembo.useraccountmanagement.models.User;
+import com.irembo.useraccountmanagement.repository.UserRepository;
+import com.irembo.useraccountmanagement.security.jwt.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

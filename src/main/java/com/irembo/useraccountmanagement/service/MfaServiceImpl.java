@@ -1,9 +1,13 @@
 package com.irembo.useraccountmanagement.service;
 
-import com.bezkoder.springjwt.models.User;
+import com.irembo.useraccountmanagement.models.Session;
+import com.irembo.useraccountmanagement.models.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -16,30 +20,51 @@ public class MfaServiceImpl implements MfaService {
 
     private static final int MFA_CODE_LENGTH = 6;
     private static final int MFA_CODE_EXPIRATION_MINUTES = 5;
-    private static final Map<String, MfaCode> mfaCodes = new HashMap<>();
+    private static final int MFA_CODE_VALIDITY_MINUTES = 10;
 
+    @Autowired
+    private SessionService sessionService;
     private final SecureRandom secureRandom = new SecureRandom();
 
     @Override
-    public void generateAndSendMfaCode(User user) {
+    public void generateAndSendMfaCode(String  email) {
         String code = generateMfaCode();
-        mfaCodes.put(user.getUsername(), new MfaCode(code, System.currentTimeMillis()));
+        System.out.println(code);
+        sessionService.storeMfaCode(email, code);
         // Send the code to the user, e.g., via SMS or email
     }
 
     @Override
-    public boolean verifyMfaCode(User user, String code) {
-        MfaCode storedCode = mfaCodes.get(user.getUsername());
-        if (storedCode != null && storedCode.getCode().equals(code)) {
-            long currentTimeMillis = System.currentTimeMillis();
-            long codeAgeMillis = currentTimeMillis - storedCode.getCreationTime();
-            if (TimeUnit.MILLISECONDS.toMinutes(codeAgeMillis) <= MFA_CODE_EXPIRATION_MINUTES) {
-                mfaCodes.remove(user.getUsername());
-                return true;
-            }
-        }
+    public boolean verifyMfaCode(String email, String code) {
         return false;
     }
+
+//    @Override
+//    public boolean verifyMfaCode(String  session, String code) {
+//        Session storedCode = sessionService.getMfaCode(session);
+//        if (storedCode != null && storedCode.getMfaCode().equals(code)) {
+//            long currentTimeMillis = System.currentTimeMillis();
+//            long codeAgeMillis = currentTimeMillis - storedCode.getCreationTime();
+//            if (TimeUnit.MILLISECONDS.toMinutes(codeAgeMillis) <= MFA_CODE_EXPIRATION_MINUTES) {
+//                mfaCodes.remove(email);
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
+
+//    @Override
+//    public boolean verifyMfaCode(User user, String code) {
+//        Session session = sessionService.getSessionByUser(user.getUsername());
+//        if (session != null) {
+//            LocalDateTime updatedAt = session.getUpdatedAt();
+//            long minutesSinceUpdate = updatedAt.until(LocalDateTime.now(), ChronoUnit.MINUTES);
+//            if (minutesSinceUpdate < MFA_CODE_VALIDITY_MINUTES && code.equals(session.getMfaCode())) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
     private String generateMfaCode() {
         StringBuilder codeBuilder = new StringBuilder(MFA_CODE_LENGTH);

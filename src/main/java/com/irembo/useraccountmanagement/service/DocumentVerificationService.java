@@ -1,7 +1,8 @@
 package com.irembo.useraccountmanagement.service;
 
-import com.bezkoder.springjwt.models.DocumentVerification;
-import com.bezkoder.springjwt.models.VerificationStatus;
+
+import com.irembo.useraccountmanagement.models.DocumentVerification;
+import com.irembo.useraccountmanagement.models.VerificationStatus;
 
 /**
  * Created by USER on 5/5/2023.

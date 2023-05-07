@@ -1,9 +1,9 @@
 package com.irembo.useraccountmanagement.controllers;
 
-import com.bezkoder.springjwt.models.User;
-import com.bezkoder.springjwt.models.UserProfile;
-import com.bezkoder.springjwt.service.UserProfileService;
-import com.bezkoder.springjwt.service.UserService;
+import com.irembo.useraccountmanagement.models.User;
+import com.irembo.useraccountmanagement.models.UserProfile;
+import com.irembo.useraccountmanagement.service.UserProfileService;
+import com.irembo.useraccountmanagement.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;

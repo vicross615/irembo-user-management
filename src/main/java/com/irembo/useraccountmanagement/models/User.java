@@ -49,13 +49,16 @@ public class User {
 	@Enumerated(EnumType.STRING)
 	private VerificationStatus verificationStatus;
 
+	private boolean mfaEnabled;
+
 	public User() {
 	}
 
-	public User(String username, String email, String password) {
+	public User(String username, String email, String password, boolean mfaEnabled) {
 		this.username = username;
 		this.email = email;
 		this.password = password;
+		this.mfaEnabled= mfaEnabled;
 	}
 
 	public Long getId() {
@@ -113,4 +116,13 @@ public class User {
 	public void setVerificationStatus(VerificationStatus verificationStatus) {
 		this.verificationStatus = verificationStatus;
 	}
+
+	public boolean isMfaEnabled() {
+		return mfaEnabled;
+	}
+
+	public void setMfaEnabled(boolean mfaEnabled) {
+		this.mfaEnabled = mfaEnabled;
+	}
+
 }

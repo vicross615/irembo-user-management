@@ -1,10 +1,10 @@
 package com.irembo.useraccountmanagement.controllers;
 
-import com.bezkoder.springjwt.models.DocumentVerification;
-import com.bezkoder.springjwt.models.User;
-import com.bezkoder.springjwt.models.VerificationStatus;
-import com.bezkoder.springjwt.service.DocumentVerificationService;
-import com.bezkoder.springjwt.service.UserService;
+import com.irembo.useraccountmanagement.models.DocumentVerification;
+import com.irembo.useraccountmanagement.models.User;
+import com.irembo.useraccountmanagement.models.VerificationStatus;
+import com.irembo.useraccountmanagement.service.DocumentVerificationService;
+import com.irembo.useraccountmanagement.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
