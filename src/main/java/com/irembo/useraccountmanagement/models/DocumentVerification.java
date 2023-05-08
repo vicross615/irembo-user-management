@@ -14,7 +14,7 @@ public class DocumentVerification implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String documentId; // National ID or passport number
+    private String documentType; // National ID or passport number
 
     private String documentImagePath;
 
@@ -30,12 +30,12 @@ public class DocumentVerification implements Serializable {
         this.id = id;
     }
 
-    public String getDocumentId() {
-        return documentId;
+    public String getDocumentType() {
+        return documentType;
     }
 
-    public void setDocumentId(String documentId) {
-        this.documentId = documentId;
+    public void setDocumentType(String documentId) {
+        this.documentType = documentType;
     }
 
     public String getDocumentImagePath() {

@@ -13,12 +13,19 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 /**
  * Created by USER on 5/5/2023.
@@ -38,8 +45,8 @@ public class DocumentVerificationController {
 
     @PostMapping("/{userId}/submit")
     public ResponseEntity<String> submitDocument(@PathVariable Long userId,
-                                                 @RequestParam("documentId") String documentId,
-                                                 @RequestParam("file") MultipartFile file) {
+                                                 @RequestParam("documentType") String documentType,
+                                                 @RequestParam("file") MultipartFile file) throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException {
         User user = userService.findById(userId);
         if (user == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -47,13 +54,17 @@ public class DocumentVerificationController {
 
         if (!file.isEmpty()) {
             try {
-                Path copyLocation = Paths.get(uploadDirectory + File.separator + StringUtils.cleanPath(file.getOriginalFilename()));
-                Files.copy(file.getInputStream(), copyLocation, StandardCopyOption.REPLACE_EXISTING);
+                // Store the document using DocumentVerificationService
+                InputStream inputStream = file.getInputStream();
+                InputStream encryptedInputStream = documentVerificationService.encryptDocument(inputStream, generateSecretKey());
+                String documentPath = documentVerificationService.storeDocument(documentType, encryptedInputStream);
 
                 DocumentVerification documentVerification = new DocumentVerification();
                 documentVerification.setUser(user);
-                documentVerification.setDocumentId(documentId);
-                documentVerification.setDocumentImagePath(copyLocation.toString());
+                documentVerification.setDocumentType(documentType);
+                // Set the document path as the S3 object key or local file path
+//                String documentPath = documentVerificationService.getDocumentPath(documentPath);
+                documentVerification.setDocumentImagePath(documentPath);
 
                 documentVerificationService.submitVerification(documentVerification);
                 return new ResponseEntity<>("Document submitted successfully", HttpStatus.OK);
@@ -64,6 +75,12 @@ public class DocumentVerificationController {
             }
         }
         return new ResponseEntity<>("File is empty", HttpStatus.BAD_REQUEST);
+    }
+
+    public SecretKey generateSecretKey() throws NoSuchAlgorithmException {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+        keyGenerator.init(256); // You can use 128, 192 or 256 bits key
+        return keyGenerator.generateKey();
     }
 
     @PostMapping("/{userId}/callback")
@@ -79,6 +96,23 @@ public class DocumentVerificationController {
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+
+    @GetMapping("/{userId}/documents")
+    public ResponseEntity<List<DocumentVerification>> getUserDocuments(@PathVariable Long userId) {
+        User user = userService.findById(userId);
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        List<DocumentVerification> userDocuments = documentVerificationService.getUserDocuments(userId);
+        return new ResponseEntity<>(userDocuments, HttpStatus.OK);
+    }
+
+    //    @GetMapping("/documents")
+//    public ResponseEntity<List<DocumentVerification>> getAllUserDocuments() {
+//        List<DocumentVerification> allUserDocuments = documentVerificationService.getAllUserDocuments();
+//        return new ResponseEntity<>(allUserDocuments, HttpStatus.OK);
+//    }
 
 
 }

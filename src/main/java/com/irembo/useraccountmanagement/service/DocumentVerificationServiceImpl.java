@@ -5,7 +5,19 @@ import com.irembo.useraccountmanagement.models.User;
 import com.irembo.useraccountmanagement.models.VerificationStatus;
 import com.irembo.useraccountmanagement.repository.DocumentVerificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.crypto.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by USER on 5/5/2023.
@@ -18,6 +30,8 @@ public class DocumentVerificationServiceImpl implements DocumentVerificationServ
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private StorageService storageService;
 
     @Override
     public DocumentVerification submitVerification(DocumentVerification documentVerification) {
@@ -26,6 +40,12 @@ public class DocumentVerificationServiceImpl implements DocumentVerificationServ
         userService.updateUser(user);
         return documentVerificationRepository.save(documentVerification);
     }
+
+//    @Override
+//    public String getDocumentPath(String documentId) {
+//        return storageService.getDocumentPath(documentId);
+//    }
+
 
     @Override
     public DocumentVerification findByUserId(Long userId) {
@@ -41,5 +61,44 @@ public class DocumentVerificationServiceImpl implements DocumentVerificationServ
             userService.updateUser(user);
         }
         return documentVerification;
+    }
+
+//    @Override
+//    public String getDocumentPath(String documentId) {
+//        return null;
+//    }
+
+    @Override
+    public List<DocumentVerification> getUserDocuments(Long userId) {
+        User user = userService.findById(userId);
+        if (user == null) {
+            return Collections.emptyList();
+        }
+        return documentVerificationRepository.findByUser(user);
+    }
+
+    @Override
+    public String storeDocument(String documentType, InputStream inputStream) throws IOException {
+        storageService.store(documentType, inputStream);
+        return documentType;
+    }
+    @Override
+    public InputStream encryptDocument(InputStream inputStream, SecretKey secretKey) throws IOException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        Cipher cipher = Cipher.getInstance("AES");
+        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        CipherInputStream cipherInputStream = new CipherInputStream(inputStream, cipher);
+        byte[] buffer = new byte[1024];
+        int bytesRead;
+
+        while ((bytesRead = cipherInputStream.read(buffer)) != -1) {
+            outputStream.write(buffer, 0, bytesRead);
+        }
+
+        cipherInputStream.close();
+        outputStream.close();
+
+        return new ByteArrayInputStream(outputStream.toByteArray());
     }
 }
