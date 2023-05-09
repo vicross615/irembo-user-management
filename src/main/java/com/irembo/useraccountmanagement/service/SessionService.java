@@ -10,5 +10,5 @@ public interface SessionService {
     String getAccessToken(String sessionId);
     void deleteSession(String sessionId);
     void storeMfaCode(String sessionId, String mfaCode);
-    Session getMfaCode(String sessionId);
+    Session  getSessionById(String sessionId);
 }

@@ -19,7 +19,6 @@ public interface DocumentVerificationService {
     DocumentVerification submitVerification(DocumentVerification documentVerification);
     DocumentVerification findByUserId(Long userId);
     DocumentVerification updateVerificationStatus(Long userId, VerificationStatus status);
-    String getDocumentPath(String documentId);
     List<DocumentVerification> getUserDocuments(Long userId);
 
     String storeDocument(String documentType, InputStream inputStream) throws IOException;

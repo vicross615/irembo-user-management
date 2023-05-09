@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -82,7 +83,7 @@ public class DocumentVerificationController {
         keyGenerator.init(256); // You can use 128, 192 or 256 bits key
         return keyGenerator.generateKey();
     }
-
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/{userId}/callback")
     public ResponseEntity<String> documentVerificationCallback(@PathVariable Long userId,
                                                                @RequestParam("status") VerificationStatus status) {
@@ -97,6 +98,7 @@ public class DocumentVerificationController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/{userId}/documents")
     public ResponseEntity<List<DocumentVerification>> getUserDocuments(@PathVariable Long userId) {
         User user = userService.findById(userId);

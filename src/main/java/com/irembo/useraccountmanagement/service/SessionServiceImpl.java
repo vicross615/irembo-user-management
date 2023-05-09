@@ -48,9 +48,8 @@ public class SessionServiceImpl implements SessionService {
 
 
 
-//    @Override
-//    public String getMfaCode(String sessionId) {
-//        Optional<Session> sessionOptional = sessionRepository.findById(sessionId);
-//        return sessionOptional.map(Session::getMfaCode).orElse(null);
-//    }
+    @Override
+    public Session  getSessionById(String sessionId) {
+        Optional<Session> sessionOptional = sessionRepository.findById(sessionId);
+        return sessionOptional.orElse(null);    }
 }

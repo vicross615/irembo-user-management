@@ -91,6 +91,7 @@ public class AuthController {
 				mfaService.generateAndSendMfaCode(userDetails.getEmail());
 				return new ResponseEntity<>("MFA code sent, please verify", HttpStatus.OK);
 			} else {
+
 				headers.add("Authorization", "Bearer " + jwt);
 				return new ResponseEntity<>("Logged in", headers, HttpStatus.OK);
 			}
@@ -196,7 +197,7 @@ public class AuthController {
 	public ResponseEntity<String> verifyMfaCode(@RequestParam("email")  String email, @RequestParam("code") String code, @CookieValue("sessionId") String sessionId) {
 		User existingUser = userService.findByEmail(email);
 		if (existingUser != null) {
-			if (mfaService.verifyMfaCode(existingUser.getEmail(), code)) {
+			if (mfaService.verifyMfaCode(sessionId, code)) {
 				String accessToken = sessionService.getAccessToken(sessionId);
 				HttpHeaders headers = new HttpHeaders();
 				headers.add("Authorization", "Bearer " + accessToken);

@@ -5,9 +5,7 @@ import com.irembo.useraccountmanagement.models.User;
 import com.irembo.useraccountmanagement.models.VerificationStatus;
 import com.irembo.useraccountmanagement.repository.DocumentVerificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.crypto.*;
 import java.io.ByteArrayInputStream;
@@ -30,8 +28,8 @@ public class DocumentVerificationServiceImpl implements DocumentVerificationServ
 
     @Autowired
     private UserService userService;
-    @Autowired
-    private StorageService storageService;
+//    @Autowired
+//    private StorageService storageService;
 
     @Override
     public DocumentVerification submitVerification(DocumentVerification documentVerification) {
@@ -79,7 +77,7 @@ public class DocumentVerificationServiceImpl implements DocumentVerificationServ
 
     @Override
     public String storeDocument(String documentType, InputStream inputStream) throws IOException {
-        storageService.store(documentType, inputStream);
+//        storageService.store(documentType, inputStream);
         return documentType;
     }
     @Override
