@@ -66,7 +66,7 @@ public class UserProfileController {
     }
 
     @PostMapping("/{userId}/update")
-    public ResponseEntity<UserProfile> updateUserProfile(@PathVariable Long userId,
+    public ResponseEntity<UserProfile> createUserProfile(@PathVariable Long userId,
                                                          @RequestBody UserProfile userProfileData) {
         User user = userService.findById(userId);
         if (user == null) {

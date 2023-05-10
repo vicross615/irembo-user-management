@@ -98,7 +98,7 @@ public class DocumentVerificationController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")          
     @GetMapping("/{userId}/documents")
     public ResponseEntity<List<DocumentVerification>> getUserDocuments(@PathVariable Long userId) {
         User user = userService.findById(userId);

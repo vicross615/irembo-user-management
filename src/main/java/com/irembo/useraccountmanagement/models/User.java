@@ -5,6 +5,8 @@ package com.irembo.useraccountmanagement.models;
 //import jakarta.persistence.Id;
 //import jakarta.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -42,7 +44,7 @@ public class User {
 				joinColumns = @JoinColumn(name = "user_id"), 
 				inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<Role> roles = new HashSet<>();
-
+	@JsonIgnore
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
 	private UserProfile userProfile;
 

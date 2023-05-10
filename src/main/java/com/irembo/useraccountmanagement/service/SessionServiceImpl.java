@@ -47,7 +47,6 @@ public class SessionServiceImpl implements SessionService {
     }
 
 
-
     @Override
     public Session  getSessionById(String sessionId) {
         Optional<Session> sessionOptional = sessionRepository.findById(sessionId);

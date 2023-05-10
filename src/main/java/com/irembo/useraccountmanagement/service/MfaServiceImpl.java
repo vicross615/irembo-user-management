@@ -28,10 +28,10 @@ public class MfaServiceImpl implements MfaService {
     private final SecureRandom secureRandom = new SecureRandom();
 
     @Override
-    public String generateAndSendMfaCode(String  email) {
+    public String generateAndSendMfaCode(String  sessionId) {
         String code = generateMfaCode();
         System.out.println(code);
-        sessionService.storeMfaCode(email, code);
+        sessionService.storeMfaCode(sessionId, code);
         // Send the code to the user, e.g., via SMS or email
         return code;
     }
@@ -51,17 +51,17 @@ public class MfaServiceImpl implements MfaService {
         return false;
     }
 
-    public boolean verifyMfaCodes(User user, String code) {
-        Session session = sessionService.getSessionByUser(user.getUsername());
-        if (session != null) {
-            LocalDateTime updatedAt = session.getUpdatedAt();
-            long minutesSinceUpdate = updatedAt.until(LocalDateTime.now(), ChronoUnit.MINUTES);
-            if (minutesSinceUpdate < MFA_CODE_VALIDITY_MINUTES && code.equals(session.getMfaCode())) {
-                return true;
-            }
-        }
-        return false;
-    }
+//    public boolean verifyMfaCodes(User user, String code) {
+//        Session session = sessionService.getSessionByUser(user.getUsername());
+//        if (session != null) {
+//            LocalDateTime updatedAt = session.getUpdatedAt();
+//            long minutesSinceUpdate = updatedAt.until(LocalDateTime.now(), ChronoUnit.MINUTES);
+//            if (minutesSinceUpdate < MFA_CODE_VALIDITY_MINUTES && code.equals(session.getMfaCode())) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
     private String generateMfaCode() {
         StringBuilder codeBuilder = new StringBuilder(MFA_CODE_LENGTH);

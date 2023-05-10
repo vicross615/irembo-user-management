@@ -5,6 +5,8 @@ package com.irembo.useraccountmanagement.models;
  */
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -33,7 +35,7 @@ public class UserProfile implements Serializable {
     private MaritalStatus maritalStatus;
 
     private String nationality;
-
+    @JsonIgnore
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;

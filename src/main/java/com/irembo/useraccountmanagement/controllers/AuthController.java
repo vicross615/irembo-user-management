@@ -88,7 +88,7 @@ public class AuthController {
 					.collect(Collectors.toList());
 
 			if (userDetails != null && userDetails.isMfaEnabled()) {
-				mfaService.generateAndSendMfaCode(userDetails.getEmail());
+				mfaService.generateAndSendMfaCode(sessionId);
 				return new ResponseEntity<>("MFA code sent, please verify", HttpStatus.OK);
 			} else {
 
